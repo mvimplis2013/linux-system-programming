@@ -1,0 +1,9 @@
+int
+main(int argc, char *argv[])
+{
+  //int arg = (argc > 1) ? getInt(argv[1], 0, "arg") : 0;
+  pid_t childPid;
+  int status;
+
+  setbuf(stdout, NULL);
+}

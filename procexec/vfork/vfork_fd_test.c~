@@ -1,0 +1,13 @@
+/* vfork_fd_test.c
+   Demonstrate that a vfork()-ed child has a separate set of file descriptors
+   from its parent.
+*/
+
+int
+main(int argc, char *argv[]) {
+  switch( vfork() ) {
+  case -1:
+    errExit("vfork");
+  }
+}
+  
