@@ -5,12 +5,25 @@
    passes each pattern to a popen() call that returns the output from ls(1) for
    the specific wildchard pattern. The program displays the returned output.
 */
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <linux/limits.h>
+
+#define POPEN_FMT "/bin/ls -d %s 2> /dev/null"
+#define PAT_SIZE 50
+#define PCMD_BUF_SIZE (sizeof(POPEN_FMT) + PAT_SIZE)
+
+typedef enum { FALSE, TRUE } Boolean;
+
 int
 main(int argc, char *argv[])
 {
   /* Pattern for globbing */
   char pat[PAT_SIZE];
-  char openCmd[PCDM_BUF_SIZE];
+  char popenCmd[PCMD_BUF_SIZE];
   /* File stream returned by popen */
   FILE *fp;
   /* Invalid characters in `pat` ? */
@@ -39,10 +52,10 @@ main(int argc, char *argv[])
     /* Ensure that the prattern contains only valid characters, i.e.,
        letters, digits, underscore, dot, and the shell globbing patterns. */
 
-    for (j=0, badPatterns=FALSE; j<len && !badPatterns; j++) 
+    for (j=0, badPattern=FALSE; j<len && !badPattern; j++) 
       if (!isalnum((unsigned char) pat[j]) &&
 	  strchr("_*?[^-].", pat[j]) == NULL)
-	badPatterns = TRUE;
+	badPattern = TRUE;
 
     if (badPattern) {
       printf("Bad Pattern character: %c\n", pat[j-1]);
@@ -67,10 +80,16 @@ main(int argc, char *argv[])
 
     /* Close pipe, fetch and display termination status */
     status = pclose(fp);
-    printf("%d matching file %s\n", fileCnt, (fileCnt != 1) ? "s" : "");
-    printf("pclose() status = %#x\n", (unsigned int) status);
+    printf("    %d matching file%s\n", fileCnt, (fileCnt != 1) ? "s" : "");
+    printf("    pclose() status = %#x\n", (unsigned int) status);
     if (status != -1) {
-      printWaitStatus("\t", status);
+      printf("%s", "\t");
+      if (WIFEXITED(status)) {
+	printf("child exited, status=%d\n", WEXITSTATUS(status));
+      } else if (WIFSIGNALED(status)) {
+	printf("child killed by signal %d (%s)",
+	       WTERMSIG(status), strsignal(WTERMSIG(status)));
+      }
     }
   }
 

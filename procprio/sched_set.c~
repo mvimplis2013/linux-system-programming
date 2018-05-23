@@ -1,0 +1,17 @@
+/* sched_set.c
+
+   Usage: sched_set policy priority pid...
+   
+   Sets the policy and priority of all processes specified by the 'pid' arguments.
+
+   See also sched_view.c
+*/
+
+#include <sched.h>
+
+int main(int argc, char *argv[])
+{
+  int j, pol;
+  struct sched_param sp;
+
+}

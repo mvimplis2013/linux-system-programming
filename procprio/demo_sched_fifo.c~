@@ -1,0 +1,12 @@
+/* demo_sched_fifo.c
+   
+   This program demonstrates the use of realtime scheduling policies.
+   It creates two processes, each running under the SCHED_FIFO scheduling policy.
+   Each process executes a function that prints a message every quarter of a second
+   of CPU time. After each second of consumed CPU time, the function and calls calls
+   sched_yield() to yield the CPU to the other process. Once a process has consumed 
+   3 seconds of CPU time, the function terminates.
+
+   This program must be run as a SUPERUSER, or (on Linux 2.6.12 and later) with a suitable
+   RLIMIT_RTRIO resource limit,
+*/
