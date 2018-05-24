@@ -11,6 +11,7 @@
    RLIMIT_RTRIO resource limit,
 */
 #define _GNU_SOURCE
+#include <unistd.h>
 #include <sched.h>
 #include <sys/resource.h>
 #include <sys/times.h>
@@ -20,6 +21,41 @@
 
 /* CPU centiseconds between messages */
 #define CSEC_STEP 25
+
+static void
+useCPU(char *msg)
+{
+  struct tms tms;
+  int cpuCentisecs, prevStep, prevSec;
+
+  prevStep = 0;
+  prevSec = 0;
+
+  for (;;) {
+    if (times(&tms) == -1) {
+      fprintf(stderr, "%s\n", "times");
+      exit(EXIT_FAILURE);
+    }
+
+    cpuCentisecs = (tms.tms_utime + tms.tms_stime) * 100 /
+      sysconf(_SC_CLK_TCK);
+
+    if (cpuCentisecs >= prevStep + CSEC_STEP) {
+      prevStep += CSEC_STEP;
+      printf("%s (PID %ld) cpu=%0.2f\n", msg, (long)getpid(), cpuCentisecs/100.0);
+    }
+
+    if (cpuCentisecs > 300)
+      /* Terminate after 3 seconds */
+      break;
+
+    if (cpuCentisecs >= prevSec + 100) {
+      /* Yield once/ second */
+      prevSec = cpuCentisecs;
+      sched_yield();
+    }
+  }
+}
 
 int
 main(int argc, char *argv[])
@@ -39,5 +75,42 @@ main(int argc, char *argv[])
   if (sched_setaffinity(getpid(), sizeof(set), &set) == -1) {
     fprintf(stderr, "%s\n", "sched_affinity");
     exit(EXIT_FAILURE);
+  }
 
+  /* Establish a CPU time limit. This demonstrates how we can ensure that a runaway 
+     realtime process is terminated if we make a programming error. The resource limit
+     is inherited by the child created using fork().
+     
+     An alternative technique would be to make an alarm() call in each process (since 
+     interval timers are not inherited across fork()). */
+
+  rlim.rlim_cur = rlim.rlim_max = 50;
+  if (setrlimit(RLIMIT_CPU, &rlim) == -1) {
+    fprintf(stderr, "%s\n", "setrlimit");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Run the two processes in the lower SCHED_FIFO priority */
+  sp.sched_priority = sched_get_priority_min(SCHED_FIFO);
+  if (sp.sched_priority == -1) {
+    fprintf(stderr, "%s\n", "sched_get_priority_min");
+    exit(EXIT_FAILURE);
+  }
+
+  if (sched_setscheduler(0, SCHED_FIFO, &sp) == -1) {
+    fprintf(stderr, "%s\n", "sched_setscheduler");
+    exit(EXIT_FAILURE);
+  }
+
+  switch (fork()){
+  case -1:
+    fprintf(stderr, "%s\n", "fork");
+    exit(EXIT_FAILURE);
+  case 0:
+    useCPU("child ");
+    exit(EXIT_SUCCESS);
+  default:
+    useCPU("parent");
+    exit(EXIT_SUCCESS);
+  }
 }

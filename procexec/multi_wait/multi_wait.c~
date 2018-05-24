@@ -1,0 +1,75 @@
+/* multi_wait.c
+   Demonstrate the use of wait(2): create multiple children and then wait
+   for them all.
+
+   Usage: multi_wait sleep-time
+
+   One child process is created for each command-line argument.
+   Each child sleeps for the number of seconds specified in the corresponding
+   command-line argument before exiting.
+   After all children have been created, the parent loops, waiting for 
+   terminated children, and displaying their PIDs.
+*/
+#include <sys/wait.h>
+#include <time.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <error.h>
+#include <string.h>
+
+int
+main(int argc, char *argv[]) {
+  /* Number of children so far waited for */
+  int numDead;
+
+  /* PID of waited for child */
+  pid_t childPid;
+
+  int j;
+
+  if (argc < 2 || strcmp(argv[1], "--help") == 0) {
+    fprintf(stdout, "%s sleep-time...\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
+  /* Disable buffering of stdout */
+  setbuf(stdout, NULL);
+
+  for (j=1; j<argc; j++) {
+    switch (fork()) {
+    case -1:
+      fprintf(stderr, "%s\n", "fork");
+      exit(EXIT_FAILURE);
+    case 0:
+      /* Child sleeps for a while then exits */
+      printf( "[%s] child %d started with PID %ld, sleeping %s secons\n",
+	     currTime("%T"), j, (long) getpid(), argv[j] );
+      sleep( getInt(argv[j]), GN_NONNEG, "sleep-time" );
+      _exit(EXIT_SUCCESS);
+    default:
+      /* Parent just continues around loop */
+      break;
+    }
+  }
+    
+  numDead = 0;
+  for (;;) {
+    /* Parent waits for each child to exit */
+    childPid = wait(NULL);
+    if (childPid == -1) {
+      if (errno == ECHILD) {
+	printf("No more children - bye !\n");
+	exit(EXIT_SUCCESS);
+      } else {
+	/* Some other unexpected error */
+	fprintf(stderr, "%s\n", "wait");
+	exit(EXIT_FAILURE);
+      }
+    }
+
+    numDead++;
+    printf("[%s] wait() returned child PID %ld (numDead = %d)\n",
+	   currTime("%T"), (long) childPid, numDead);
+  }
+}

@@ -1,0 +1,41 @@
+/* fork_sig_sync.c
+
+   Demonstrates how signals can be used to synchronize the actions of a 
+   parent and child process.
+*/
+#include <signal.h>
+
+/* Declaration of currTime() */
+#include "curr_time.h"
+
+/* Synchronization signal */
+#define SYNC_SIG SIGUSR1
+
+static void
+handler(int sig)
+{
+  /* Signal handler - does nothing but return */
+}
+
+int main(int argc, char *argv[])
+{
+  pid_t childPid;
+  sigset_t blockMask, origMask, emptyMask;
+  struct sigaction sa;
+
+  /* Disable buffering of stdout */
+  setbuf(stdout, NULL);
+
+  sigemptyset(&blockMask);
+  /* Block signal */
+  sigaddset(&blockMask, SYNC_SIG);
+
+  if (sigprocmask(SIG_BLOCK, &blockMask, &origMask) == -1) {
+    fprintf(stderr, "%s\n", "sigprocmask");
+    exit(EXIT_FAILURE);
+  }
+
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART;
+  
+  
