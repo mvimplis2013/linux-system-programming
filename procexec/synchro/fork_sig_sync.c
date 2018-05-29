@@ -4,6 +4,8 @@
    parent and child process.
 */
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 /* Declaration of currTime() */
 #include "curr_time.h"
