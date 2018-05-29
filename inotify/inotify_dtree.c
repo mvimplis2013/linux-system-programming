@@ -9,3 +9,18 @@
     to perform tasks such as dumping the current state of the cache and running a consistency check 
     of the cache against the current state of the directory tree(s).
     The rand_dtree.c program can be used to stress test the operation of this program.
+*/
+
+/*  Known limitations
+        - Pathnames longer than PATH_MAX are not handled 
+*/
+
+#define _GNU_SOURCE 
+
+int 
+main(int argc, char *argv[]) {
+    fd_set rfds;
+    int opt;
+    int inotifyFd;
+}
+    
