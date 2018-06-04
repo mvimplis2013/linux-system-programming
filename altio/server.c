@@ -1,4 +1,5 @@
-// Simple example of a server with select() 
+// Simple example of a server with select() and multiple clients.
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 #include <signal.h>
 #include <string.h>
 #include <fcntl.h>
-#include <netinet.h>
+#include <netinet/in.h>
 #include <unistd.h>
 
 #include "message.h"
@@ -38,7 +39,7 @@ void handle_signal_action(int sig_number) {
 int setup_signals() {
     struct sigaction sa;
 
-    sa.sa_handler = handler_signal_action;
+    sa.sa_handler = handle_signal_action;
 
     if (sigaction(SIGINT, &sa, 0) != 0) {
         perror("sigaction()");
@@ -69,7 +70,7 @@ start_listen_socket(int *listen_sock) {
     }
 
     struct sockaddr_in my_addr;
-    memset(my_addr, 0, sizeof(my_addr));
+    memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = inet_addr(SERVER_IPV4_ADDR);
     my_addr.sin_port = htons(SERVER_LISTEN_PORT);
@@ -94,8 +95,8 @@ void shutdown_properly(int code) {
     int i;
 
     for (i=0; i<MAX_CLIENTS; i++) {
-        if (connections_list[i].socket != NO_SOCKET) {
-            close(connections_list[i].socket)
+        if (connection_list[i].socket != NO_SOCKET) {
+            close(connection_list[i].socket);
         }
     }
 
@@ -103,14 +104,13 @@ void shutdown_properly(int code) {
     exit(code);
 }
 
-int 
-build_fd_sets(fd_set &read_fds, fd_set &write_fds)
+int build_fd_sets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds)
 {
     int i;
 
     FD_ZERO(read_fds);
     FD_SET(STDIN_FILENO, read_fds);
-    FD_SET(listen_socket, read_fds);
+    FD_SET(listen_sock, read_fds);
     for (i=0; i<MAX_CLIENTS; i++) {
         if (connection_list[i].socket != NO_SOCKET) {
             FD_SET(connection_list[i].socket, read_fds);
@@ -151,7 +151,7 @@ int handle_new_connection() {
     char client_ipv4_str[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ipv4_str, INET_ADDRSTRLEN);
 
-    printf("Incoming connection from %s:%d.\n", client_ipv4_str, client_add.sin_port);
+    printf("Incoming connection from %s:%d.\n", client_ipv4_str, client_addr.sin_port);
 
     int i;
     for (i=0; i<MAX_CLIENTS; i++) {
@@ -180,7 +180,7 @@ int close_client_connection(peer_t *client) {
 
     dequeue_all(&client->send_buffer);
 
-    client->current_reading_byte = -1;
+    client->current_sending_byte = -1;
     client->current_receiving_byte = 0;
 }
 
@@ -242,14 +242,14 @@ int main(int argc, char **argv) {
 
     fd_set read_fds;
     fd_set write_fds;
-    fd_ser except_fds;
+    fd_set except_fds;
 
     int high_sock = listen_sock;
 
     printf("Waiting for incomming connections.\n");
 
     while (1) {
-        build_fd_sets(&read_fds, &write_fds, &except_fds, NULL);
+        build_fd_sets(&read_fds, &write_fds, &except_fds);
 
         high_sock = listen_sock;
 

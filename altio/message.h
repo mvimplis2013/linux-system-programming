@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 /*  MAXimum bytes that can be send() or recv() via net by one call.
     It is a good idea to test sending one byte by one.
@@ -32,7 +33,7 @@ int prepare_message(char *sender, char *data, message_t *message) {
     return 0;
 }
 
-int print_message(message_t message) {
+int print_message(message_t *message) {
     printf("Message: \"%s: %s\"\n", message->sender, message->data);
     return 0;
 }
@@ -46,7 +47,7 @@ typedef struct {
 
 int create_message_queue(int queue_size, message_queue_t *queue) {
     queue->data = calloc(queue_size, sizeof(message_t));
-    queus->size = queue_size;
+    queue->size = queue_size;
     queue->current = 0;
 
     return 0;
@@ -72,7 +73,7 @@ int dequeue(message_queue_t *queue, message_t *message) {
     if (queue->current == 0)
         return -1;
     
-    memcpy(message, &queue->data[&queue->current-1], sizeof(message_t));
+    memcpy(message, &queue->data[queue->current-1], sizeof(message_t));
     queue->current--;
 
     return 0;
@@ -134,7 +135,7 @@ int peer_add_to_send(peer_t *peer, message_t *message) {
 /* Receive message from peer and handle it with the message_handler() */
 int receive_from_peer(peer_t *peer, int (*message_handler)(message_t))
 {
-    printf("Ready for recv() from %s.\n", peer_getaddress_str(peer));
+    printf("Ready for recv() from %s.\n", peer_get_address_str(peer));
 
     size_t len_to_receive;
     ssize_t received_count;
@@ -142,7 +143,7 @@ int receive_from_peer(peer_t *peer, int (*message_handler)(message_t))
     do {
         // is completely received
         if (peer->current_receiving_byte >= sizeof(peer->receiving_buffer)) {
-            message_handler(&peer->receiving_buffer);
+            message_handler(peer->receiving_buffer);
             peer->current_receiving_byte = 0;
         }
 
@@ -153,7 +154,7 @@ int receive_from_peer(peer_t *peer, int (*message_handler)(message_t))
 
         printf("Let's try to recv() %zd bytes ...", len_to_receive);
         received_count = recv(peer->socket, (char *)&peer->receiving_buffer + peer->current_receiving_byte,
-            len_to_receive, MSG_NONTWAIT);
+            len_to_receive, MSG_DONTWAIT);
         if (received_count < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 printf("peer is not ready right now, try again later.\n");
@@ -244,8 +245,8 @@ int send_to_peer(peer_t *peer) {
 // common ------------------------------------------------------------------------
 
 /* Reads from stdin and create new message. This message enqueues to send queue. */
-int read_from_stdin(char *read_buffer, size_t max_length) {
-    memset(read_buffer, 0, max_length);
+int read_from_stdin(char *read_buffer, size_t max_len) {
+    memset(read_buffer, 0, max_len);
 
     ssize_t read_count = 0;
     ssize_t total_read = 0;
