@@ -9,6 +9,8 @@
  * Create 'num-pipes' pipes, and perform 'num-writes' writes to
  * randomly selected pipes. Then use poll() to inspect the read
  * ends of the pipes to see which pipes are readable.
+ * 
+ * gcc -I ../lib/ ../lib/error_functions.c ../lib/get_num.c poll_pipes.c
  */
 #include <time.h>
 #include <poll.h>
