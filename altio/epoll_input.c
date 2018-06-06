@@ -9,6 +9,8 @@
  * and monitors the resulting file descriptors for input events.
  * 
  * This program is Linux (2.6 and later) specific.
+ * 
+ * gcc -I ../lib/ ../lib/get_num.c ../lib/error_functions.c epoll_input.c -o epoll_input
  * */
 #include <sys/epoll.h>
 #include <fcntl.h>
@@ -77,7 +79,8 @@ int main(int argc, char *argv[]) {
         /* Deal with returned list of events */
 
         for (j=0; j<ready; j++) {
-            printf("  fd=%d; events: %s%s%s\n", evlist[j].data.fd,
+            printf("  fd=%d; events: %s%s%s\n", 
+                evlist[j].data.fd,
                 (evlist[j].events & EPOLLIN) ? "EPOLLIN " : "",
                 (evlist[j].events & EPOLLHUP) ? "EPOLLHUP " : "",
                 (evlist[j].events & EPOLLERR) ? "EPOLLERR " : "");
