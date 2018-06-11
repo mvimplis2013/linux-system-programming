@@ -45,6 +45,7 @@ struct {
 };
 
 void getopts(int argc, char **argv);
+void myconnect(MQTTAsync *client);
 
 void usage(void) {
     printf("MQTT stdin publisher\n");
@@ -78,6 +79,15 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response) {
 
     MQTTAsync client = (MQTTAsync)context;
     myconnect(client);
+}
+
+void connectionLost(void *context, char *cause) {
+    MQTTAsync client = (MQTTAsync)context;
+    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+    MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
+    int rc = 0;
+
+    printf("Connecting\n");
 }
 
 void onConnect(void *context, MQTTAsync_successData *response) {
