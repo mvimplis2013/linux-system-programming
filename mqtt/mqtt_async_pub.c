@@ -25,12 +25,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <MQTTAsync.h>
 
 struct {
     char *clientid;
-    char *delimeiter;
+    char *delimiter;
     int maxdatalen;
     int qos;
     int retained;
@@ -72,6 +73,7 @@ void cfinish(int sig) {
 }
 
 static int connected = 0;
+static int disconnected = 0;
 
 void onConnectFailure(void *context, MQTTAsync_failureData *response) {
     printf("Connect failed, rc is %d\n", response ? response->code : -1);
@@ -81,6 +83,11 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response) {
     myconnect(client);
 }
 
+void onConnect(void *context, MQTTAsync_successData *response) {
+    printf("Connected");
+    connected = 1;
+}
+
 void connectionLost(void *context, char *cause) {
     MQTTAsync client = (MQTTAsync)context;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
@@ -88,11 +95,23 @@ void connectionLost(void *context, char *cause) {
     int rc = 0;
 
     printf("Connecting\n");
-}
+    conn_opts.keepAliveInterval = 10;
+    conn_opts.cleansession = 1;
+    conn_opts.username = opts.username;
+    conn_opts.password = opts.password;
+    conn_opts.onSuccess = onConnect;
+    conn_opts.onFailure = onConnectFailure;
+    conn_opts.context = client;
 
-void onConnect(void *context, MQTTAsync_successData *response) {
-    printf("Connected");
-    connected = 1;
+    ssl_opts.enableServerCertAuth = 0;
+    //conn_opts.ssl_opts = &ssl_opts;
+
+    connected = 0;
+
+    if ((rc=MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
+        printf("Failed to start connect, return code is %d\n", rc);
+        exit(EXIT_FAILURE);        
+    }
 }
 
 void myconnect(MQTTAsync *client) {
@@ -127,6 +146,21 @@ int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_messa
     return 1;
 }
 
+void onDisconnect(void *context, MQTTAsync_successData *response) {
+    disconnected = 1;
+}
+
+static int published = 0;
+
+void onPublish(void *context, MQTTAsync_successData *response) {
+    published = 1;
+}
+
+void onPublishFailure(void *context, MQTTAsync_failureData *response) {
+    printf("Published failed, return code is %d\n", response ? response->code : -1 );
+    published = -1;
+}
+
 /*
  * Main() 
  */
@@ -135,8 +169,11 @@ int main(int argc, char **argv) {
     char *topic = NULL;
     int rc = 0;
     MQTTAsync client;
+    char *buffer = NULL;
 
     MQTTAsync_createOptions create_opts = MQTTAsync_createOptions_initializer;
+    MQTTAsync_responseOptions pub_opts = MQTTAsync_responseOptions_initializer;
+    MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
 
     if (argc < 2) {
         usage();
@@ -162,6 +199,56 @@ int main(int argc, char **argv) {
     rc = MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, NULL);
 
     myconnect(&client);
+
+    buffer = malloc(opts.maxdatalen);
+
+    while (!toStop) {
+
+        int data_len = 0;
+        int delim_len = 0;
+
+        delim_len = (int)strlen(opts.delimiter);
+
+        do {
+            buffer[data_len++] = getchar();
+
+            if (data_len > delim_len) {
+                if (strncmp(opts.delimiter, &buffer[data_len - delim_len], delim_len) == 0) {
+                    break;
+                }
+            }
+        } while (data_len < opts.maxdatalen);
+
+        if (opts.verbose) {
+            printf("Publishing data of length %d\n", data_len);
+        }
+
+        pub_opts.onSuccess = onPublish;
+        pub_opts.onFailure = onPublishFailure;
+
+        do {
+            rc = MQTTAsync_send(client, topic, data_len, buffer, opts.qos, opts.retained, &pub_opts);
+        } while (rc != MQTTASYNC_SUCCESS);
+    }
+
+    printf("Stopping\n");
+
+    free(buffer);
+
+    disc_opts.onSuccess = onDisconnect;
+
+    if ((rc = MQTTAsync_disconnect(client, &disc_opts)) != MQTTASYNC_SUCCESS) {
+        printf("Failed to start disconnect, return code is %d\n", rc);
+        exit(EXIT_FAILURE);                
+    } 
+
+    while (!disconnected) {
+        usleep(10000L);
+    }
+
+    MQTTAsync_destroy(&client);
+
+    return EXIT_SUCCESS;
 }
 /*
  * End of Main()
@@ -241,7 +328,7 @@ void getopts(int argc, char **argv) {
         }
         else if (strcmp(argv[count], "--delimiter") == 0) {
             if (++count < argc) {
-                opts.delimeiter = argv[count];
+                opts.delimiter = argv[count];
             } else {
                 usage();
             }
