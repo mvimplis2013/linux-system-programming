@@ -18,7 +18,8 @@
 #define DATA_MAXSIZE 512
 
 #define SERVER_IPV4_ADDR "127.0.0.1"
-#define SERVER_LISTEN_PORT 33235
+//#define SERVER_LISTEN_PORT 33235
+#define SERVER_LISTEN_PORT 1883             /* Local Broker */
 
 // message ----------------------------------------------------------
 typedef struct {

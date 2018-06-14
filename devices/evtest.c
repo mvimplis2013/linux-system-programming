@@ -1,6 +1,11 @@
 /* Compile this program with gcc -o evtest evtest.c, then run it against the
  * device file as root, e.g. "sudo evtest /dev/input/event0"
- * You can get the device file from /proc/bus/input/device */
+ * You can get the device file from /proc/bus/input/device 
+ *
+ * gcc -o evtest evtest.c
+ * 
+ * sudo ./evtest /dev/input/event0 
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -306,8 +311,7 @@ int main(int argc, char **argv) {
 
     memset(bit, 0, sizeof(bit));
     ioctl(fd, EVIOCGBIT(0, EV_MAX), bit[0]);
-    printf("Supported Events:\n");
-
+    
     for (i=0; i<EV_MAX; i++) {
         if (test_bit(i, bit[0])) {
             printf("\tEvent type %d (%s)\n", 
@@ -320,14 +324,17 @@ int main(int argc, char **argv) {
 
             for (j=0; j<KEY_MAX; j++) {
                 if (test_bit(j, bit[i])) {
-                    printf("\tEvent code %d (%s)\n", j, 
-                        names[i] ? (names[i][j] ? names[i][j] : "?") : "?");
+                    printf("\tEvent code %d (%s)\n", j, names[i] ? 
+						(names[i][j] ? names[i][j] : "?") : "?");
+						
+                    if (i == EV_ABS) {
+						ioctl(fd, EVIOCGABS(j), abs);
 
-                    for (k=0; k<5; k++) {
-                        if ((k<3) || abs[k]) {
-                            printf("\t%s %6d\n", absval[k], abs[k]);
+						for (k=0; k<5; k++) {
+							if ((k<3) || abs[k]) {
+                            	printf("\t%s %6d\n", absval[k], abs[k]);
+							}
                         }
-
                     }
                 }
             }
