@@ -61,7 +61,6 @@ void usage(void) {
     printf("    --username none\n");
     printf("    --password none\n");
     printf("    --keepalive <seconds> (default is 10 seconds)\n");
-
     exit(EXIT_FAILURE);
 }
 
@@ -223,6 +222,9 @@ int main(int argc, char **argv) {
             printf("Publishing data of length %d\n", data_len);
         }
 
+        pipe(pfd);
+        pselect();
+        
         pub_opts.onSuccess = onPublish;
         pub_opts.onFailure = onPublishFailure;
 
