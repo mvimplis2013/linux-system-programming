@@ -43,10 +43,14 @@
 
 #include <MQTTAsync.h>
 
-#include "button_constants.h"
+#include "handle_sensor_io_events.h"
 
 #define DEVICE_PATH "/dev/input/event2"
+#define DEVICE_PATH_MOUSE "/dev/input/event3"
+
 #define LOG_LEVEL LOG_DEBUG
+
+#define MAX(X, Y) (X > Y ? X : Y)
 
 /* Global Status Variables for Different Application Stages */
 MQTTAsync client;
@@ -416,18 +420,10 @@ int main(int argc, char **argv)
 	int rc = 0;
 	char *buffer = NULL;
 
-	char mqtt_msq[1000];
-	char msg_1[300];
-	char msg_2[300];
-	char msg_3[300];
-
 	int delim_len;
 
 	/* The number of bytes read */
 	ssize_t rd;
-
-	/* identifier for keystrokes info */
-	struct input_event ev[64];
 
 	int i;
 
@@ -451,10 +447,13 @@ int main(int argc, char **argv)
 	/* nfds .. should be set to the highest-number file descriptor 
 	 *         in any of the three-sets plus(+) 1
 	 */
-	int nfds;
+	int nfds=0;
 
 	/* An abstract indicator used to access an input/output resource */
 	int fd;
+	int fd_mouse;
+
+	char mqtt_msg[1000];
 
 	/* ************************* SYSLOG Setup **************************  */
 	/* *****************************************************************  */
@@ -523,32 +522,54 @@ int main(int argc, char **argv)
 	pto = NULL;					/* Infinite timeout */
 
 	/* Initialize FDS */
+	/** KEYBOARD **/
 	FD_ZERO( &readfds );
 
-	/* Open Device File */
+	/* Open Device File KEYBOARD */
 	if (
 		(fd = open(DEVICE_PATH, O_RDONLY)) < 0 ) 
 	{
 		/** Failure **/
 		
 		//perror("open");
-		syslog(LOG_ERR, "open() Driver Failure\n");
+		syslog(LOG_ERR, "open() kEYBOARD Driver Failure\n");
 
 		/* Abort */
 		exit(EXIT_FAILURE);
 	} else {
 		/** Success **/
-		syslog(LOG_DEBUG, "Successful Device Driver Open\n");
+		syslog(LOG_DEBUG, "Successful KEYBOARD Device Driver Open\n");
 	}
 
 	/* Let SELECT() monitor if iput is possible in Sensor/ Button Driver */
-	FD_SET(fd, &readfds);
-
+	FD_SET( fd, &readfds);
 	/* Highest numbered file descriptor */
-	nfds = 0;
-	if (fd > nfds) {
-		nfds = fd + 1;
+	nfds = MAX(nfds, fd);
+
+	/** Open Device File MOUSE **/
+	if (
+		(fd_mouse = open(DEVICE_PATH_MOUSE, O_RDONLY)) < 0 ) 
+	{
+		/** Failure **/
+		
+		//perror("open");
+		syslog(LOG_ERR, "open() MOUSE Driver Failure\n");
+
+		/* Abort */
+		exit(EXIT_FAILURE);
+	} else {
+		/** Success **/
+		syslog(LOG_DEBUG, "Successful MOUSE Device Driver Open\n");
 	}
+
+	FD_SET( fd_mouse, &readfds);
+	nfds = MAX(nfds, fd_mouse);
+
+	printf("nfds = %d\n", nfds);
+
+	nfds += 1;
+	syslog(LOG_DEBUG, "Maximum FDS: %d\n", nfds);
+	printf("nfds2 = %d\n", nfds);
 
 	/* Is there a specific reason those are not global variables ? */
 	/* as global vars we could move MQTT malas in specific functions */
@@ -575,7 +596,7 @@ int main(int argc, char **argv)
 	syslog(LOG_DEBUG, "My\n"); 
 	myconnect( &client );
 	
-	printf("Hello World!\n");
+	printf("HelloMiltos1\n");
 
 	/* Evtest Code Snippet .. */
 	while (1) {
@@ -596,45 +617,69 @@ int main(int argc, char **argv)
 			syslog(LOG_DEBUG, "Read() Sensor Driver : SUCCESS\n");
 		}*/
 
-		ready = select(nfds, &readfds, NULL, NULL, pto);
+		FD_ZERO( &readfds );
+		
+		FD_SET( fd, &readfds);
+		nfds = MAX(nfds, fd);
+	
+		FD_SET( fd_mouse, &readfds);
+		nfds = MAX(nfds, fd_mouse);
+
+		/*
+		FD_ZERO( &exceptfds );
+		FD_SET(STDIN_FILENO, &exceptfds);
+		FD_SET(server-socket, &exceptfds);
+
+		FD_ZERO( &writefds );
+		FD_SET(server-socket, &writefds);
+		*/
+
+
+		/* nfds += 1; */
+		ready = select(nfds+1, &readfds, NULL, NULL, pto);
 		
         /** New Sensor/ Button Data Arrived **/
 
-		printf("blocked\n");
-		rd = read( fd, ev, sizeof(struct input_event)*64 );
-		printf("unblocked");
+		switch (ready) {
+			case -1:
+				/** An Error Ocred **/
 
-        for (i=0; i<rd/sizeof(struct input_event); i++) {
-            if (ev[i].type == EV_SYN) {
-				//sprintf(url, "%s:%s", opts.host, opts.port);
-                sprintf(msg_1, 
-					"Event: time %ld.%06ld, -------- %s --------\n",
-                    ev[i].time.tv_sec, ev[i].time.tv_usec, 
-                    ev[i].code ? "Config Sync" : "Report Sync");
-            } else if (ev[i].type == EV_MSC && (ev[i].code == MSC_RAW || ev[i].code == MSC_SCAN)) {
-                sprintf(msg_2,
-					"Event: time %ld.%06ld, type %d (%s), code %d (%s), value %02x\n",
-                    ev[i].time.tv_sec, ev[i].time.tv_usec, ev[i].type,
-                    events[ev[i].type] ? events[ev[i].type] : "?",
-                    ev[i].code,
-                    names[ev[i].type] ? (names[ev[i].type][ev[i].code] ? names[ev[i].type][ev[i].code] : "?") : "?",
-                    ev[i].value);
-            } else {
-                sprintf(msg_3,
-					"Event: time %ld.%06ld, type %d (%s), code %d (%s), value %d\n",
-                    ev[i].time.tv_sec, ev[i].time.tv_usec, ev[i].type,
-                    events[ev[i].type] ? events[ev[i].type] : "?",
-                    ev[i].code,
-                    names[ev[i].type] ? (names[ev[i].type][ev[i].code] ? names[ev[i].type][ev[i].code] : "?") : "?",
-                    ev[i].value);                    
-            }
-        }
+				/* perror("select()"); */
+				syslog(LOG_ERR, "SELECT() Call Error Occured!\n");
 
-		printf("%s\n", msg_1);
-		printf("%s\n", msg_2);
-		printf("%s\n", msg_3);
+				/* shutdown_properly(); */
+				exit(EXIT_FAILURE);
+			case 0:
+				/** Call Timeout Before Any FD is Ready **/
 
-		tryToSend( topic, strlen(msg_3), msg_3 );
+				/* printf("SELECT() Call Timeout Reached!\n"); */
+				syslog(LOG_ALERT, "SELECT() Call Timeout!\n");
+
+				/* shutdown_properly(); */
+				exit(EXIT_FAILURE);
+
+			default: 
+				/** One or More File-Descriptors are Ready **/
+				syslog(LOG_DEBUG, "Ready File Descriptors #%d\n", ready);
+
+				/** All fd_set's should be checked to find out which 
+				 *  I/O events occured 
+				 **/
+				if ( FD_ISSET(fd, &readfds) ) 
+				{
+					printf("TTT\n");
+					handleKeyboardIOEvent(fd, mqtt_msg);
+				}
+
+				if ( FD_ISSET(fd_mouse, &readfds) )
+				{
+					printf("JJJJ\n");
+					handleMouseIOEvent(fd_mouse, mqtt_msg);
+				}
+		}
+
+		printf("mqtt-msg = %s\n", mqtt_msg);
+		tryToSend( topic, strlen(mqtt_msg), mqtt_msg );
     }
 
 	while (!toStop) {
