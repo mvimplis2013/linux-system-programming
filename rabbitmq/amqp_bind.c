@@ -49,4 +49,23 @@ int main(int argc, char const *const *argv) {
         amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"),
         "Logging in"
     );
+
+    amqp_channel_open(conn, 1);
+    die_on_amqp_error(amqp_get_rpc_reply(conn), "Opening channel");
+
+    amqp_queue_bind(conn, 1, 
+        amqp_cstring_bytes(queue),
+        amqp_cstring_bytes(exchange),
+        amqp_cstring_bytes(bindingkey),
+        amqp_empty_table);
+    
+    die_on_amqp_error(amqp_get_rpc_reply(conn), "Unbinding");
+
+    die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), "Closing channel");
+
+    die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), "Closing connection");
+
+    die_on_error(amqp_destroy_connection(conn), "Ending connection");
+
+    return 0;    
 }
