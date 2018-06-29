@@ -7,7 +7,7 @@ function start() {
         'amqp://localhost:5672', function(err, conn) 
         {
             if (err) {
-                console.error("[AMQP]", err.message);
+                console.error("[AMQP] connect", err.message);
                 return setTimeout(start, 1000);
             }
 
@@ -55,7 +55,7 @@ function startPublisher() {
             pubChannel = ch;
 
             while (true) {
-                var m = offlineQueue.shift();
+                var m = offlinePubQueue.shift();
 
                 if (!m) break;
 
@@ -88,10 +88,66 @@ function startWorker() {
             return;
         }
 
-        ch.on("error");
-        ch.on("close");
-        
-    })
+        ch.on("error", function(err) {
+            console.error("[AMQP] channel error", err.message);
+        });
+
+        ch.on("close", function() {
+            console.log("[AMQP] channel closed");
+        });
+
+        ch.prefetch(10);
+
+        ch.assertQueue("celery", { durable: true }, function(err, _ok) {
+            if (closeOnErr(err)) {
+                return;
+            } 
+
+            ch.consume("celery", processMsg, { noAck: false });
+
+            console.log("Worker is started");
+        });
+
+        function processMsg(msg) {
+            work(msg, function(ok) {
+                try {
+                    if (ok) {
+                        ch.ack(msg);
+                    }
+                    else {
+                        ch.reject(msg, true);
+                    }
+                } catch (e) {
+                    closeOnErr(e);
+                }
+            });
+        } 
+    });
+}
+
+function work(msg, cb) {
+    console.log("Got msg", msg.content.toString());
+    cb(true);
+}
+
+function closeOnErr(err) {
+    if (!err) {
+        return false;
+    }
+
+    console.error("[AMQP] error", err);
+    amqpConn.close();
+    
+    return true;
+}
+
+setInterval( function() {
+    publish("celery", "celery", new Buffer("work work work"));
+}, 1000);
+
+start();
+
+/*
             var q = 'celery';
 
         ch.assertQueue(q, {durable: true});
@@ -107,7 +163,7 @@ function startWorker() {
     }, 500);
 });
 
-/*var connection = amqp.createConnection(
+var connection = amqp.createConnection(
     {
         host: 'localhost', port: 5672
     });
