@@ -121,7 +121,10 @@ void cfinish(int sig)
  */
 void onConnectFailure(void *context, MQTTAsync_failureData * response)
 {
-	//printf("Connect failed, rc is %d\n", response ? response->code : -1);	/* don't use ? - unreadable code */
+	/* don't use ? - unreadable code */
+	/* printf("Connect failed, rc is %d\n", response ? response->code : -1); */
+	syslog(LOG_DEBUG, "Connect failed, rc is %d , context-pointer is %p\n", response ? response->code : -1, context);
+
 	connected = -1;		/* not necessarily atomic */
 }
 
@@ -131,7 +134,8 @@ void onConnectFailure(void *context, MQTTAsync_failureData * response)
  */
 void onConnect(void *context, MQTTAsync_successData * response)
 {
-	//printf("Connected");
+	/*printf("Connected");*/
+	syslog(LOG_DEBUG, "Connected OK , qos is %d, context-pointer is %p\n", response ? response->alt.qos : -1, context);
 
 	/* Proceed to next stage ... Have a Connection to Server */ 
 	connected = 1;		/* not necessarily atomic */
@@ -139,30 +143,35 @@ void onConnect(void *context, MQTTAsync_successData * response)
 
 void connectionLost(void *context, char *cause)
 {
-	MQTTAsync client = (MQTTAsync) context;
+	MQTTAsync client_lost = (MQTTAsync) context;
 	MQTTAsync_connectOptions conn_opts =
 	    MQTTAsync_connectOptions_initializer;
-	MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
+	
+	/*MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer; */
+
 	int rc = 0;
-	ssl_opts = ssl_opts;
+	
+	/*ssl_opts = ssl_opts;*/
 
 	cause = cause;
 
-	printf("Connecting\n");
+	/*printf("Connecting\n");*/
+	syslog(LOG_DEBUG, "Connection Lost - Connecting Again ...");
+	
 	conn_opts.keepAliveInterval = 10;
 	conn_opts.cleansession = 1;
 	conn_opts.username = opts.username;
 	conn_opts.password = opts.password;
 	conn_opts.onSuccess = onConnect;
 	conn_opts.onFailure = onConnectFailure;
-	conn_opts.context = client;
+	conn_opts.context = client_lost;
 
-	ssl_opts.enableServerCertAuth = 0;
-	/*conn_opts.ssl_opts = &ssl_opts; */
+	/* ssl_opts.enableServerCertAuth = 0; */
+	/*conn_opts.ssl_opts = &ssl_opts;*/
 
 	connected = 0;
 
-	if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
+	if ((rc = MQTTAsync_connect(client_lost, &conn_opts)) != MQTTASYNC_SUCCESS) {
 		printf("Failed to start connect, return code is %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
@@ -173,23 +182,21 @@ void connectionLost(void *context, char *cause)
  * On Top of TCP/ IP stack
  * Client sends a CONNECT message and Server responds with a CONNACK 
  */
-void myconnect( MQTTAsync * client )
+void myconnect( MQTTAsync * client_in )
 {
 	/* 
 	 * struct_id, struct_version, keepAliveInterval, cleansession,
 	 * maxInFlight, username, password, connectTimeout, retryInterval,
 	 * ssl, onSuccess, onFailure, context
 	 */
-	MQTTAsync_connectOptions conn_opts =
-	    MQTTAsync_connectOptions_initializer;
+	MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
 	/* 
 	 * struct_id, struct_version, trustStore, keyStore, privateKey,
 	 * privateKeyPassword, enableCipherSuites, enableServerCertAuth
 	 */
-	MQTTAsync_SSLOptions ssl_opts = 
-		MQTTAsync_SSLOptions_initializer;
-
+	/* MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer; */
+	
 	int rc;
 	
 	/* 
@@ -206,15 +213,15 @@ void myconnect( MQTTAsync * client )
 	conn_opts.onFailure = onConnectFailure;
 
 	/* the context to be passed to callbacks */
-	conn_opts.context = client;
+	conn_opts.context = client_in;
 
-	/* No SSL/ TLS connection using the OpenSSL library */ 
-	ssl_opts.enableServerCertAuth = 0;
-	
 	conn_opts.automaticReconnect = 1;
 	/*** Finished Connection Options Configuration ***/
 
-	// printf("Connecting\n");
+	/* No SSL/ TLS connection using the OpenSSL library */ 
+	/* ssl_opts.enableServerCertAuth = 0; */
+
+	/* printf("Connecting\n"); */
 	syslog(LOG_DEBUG, "Ready to Connect to Server\n");
 
 	/*** How Many Attempts to Establish Client-Server Connection ***/
@@ -237,7 +244,7 @@ void myconnect( MQTTAsync * client )
 		/* New Attempt */ 
 		counter++;
 
-		if ( (rc = MQTTAsync_connect(*client, &conn_opts)) 
+		if ( (rc = MQTTAsync_connect(*client_in, &conn_opts)) 
 				== MQTTASYNC_SUCCESS ) 
 		{
 			/* MQTT Server - Client Connection Established */
@@ -275,7 +282,8 @@ int messageArrived(void *context, char *topicName, int topicLen,
 void 
 deliveryComplete(void *context, MQTTAsync_token token) 
 {
-	syslog(LOG_DEBUG, "Successful MQTT Message Delivery");
+	syslog(LOG_DEBUG, "Successful MQTT Message Delivery, token is %d , context is %p\n", token, context);
+
 	is_delivered = 1;
 }
 
@@ -331,8 +339,8 @@ tryToCreateClient( char *url ) {
 		NULL,
 		&create_opts);
 	if (rc != MQTTASYNC_SUCCESS) {
-		// MQTT Client Failure
-		// perror("mqttasync_createwithoptions()");
+		/* MQTT Client Failure */
+		/* perror("mqttasync_createwithoptions()");  */
 		
 		syslog(LOG_ERR, "Failed to start CREATE, return code `%d`\n", rc);
 		
@@ -362,7 +370,7 @@ tryToCreateClient( char *url ) {
 		messageArrived,			/* Pointer to MQTTAsync_messageArrived() to handle reeipt of messages */ 
 		deliveryComplete);		/* Pointer to MQTTAsync_deliveryComplete() check for successful delivery */
 	if (rc != MQTTASYNC_SUCCESS) {
-		// perror("MQTTAsync_setCallbacks()");
+		/* perror("MQTTAsync_setCallbacks()"); */
 
 		syslog(LOG_ERR, "Failed to Set Callbacks, return code `%d`\n", rc);
 		
@@ -417,15 +425,15 @@ int main(int argc, char **argv)
 {
 	char url[100];
 	char *topic = NULL;
-	int rc = 0;
+	/* int rc = 0; */
 	char *buffer = NULL;
 
-	int delim_len;
+	/* int delim_len; */
 
 	/* The number of bytes read */
-	ssize_t rd;
+	/* ssize_t rd; */
 
-	int i;
+	/* int i; */
 
 	/* select() system call configuration arguments 
 	 * ******************************************** */
@@ -466,7 +474,7 @@ int main(int argc, char **argv)
 	 * openlog may or may not open the /dev/log socket, depending on option. If it does, it tries to open it and connect it as a stream socket.
 	 */  
 	openlog ( "button-handler", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-	//const char *format = "%syslogpriority%,%syslogfacility%,%timegenerated%,%HOSTNAME%,%syslogtag%,%msg%\n";
+	/*const char *format = "%syslogpriority%,%syslogfacility%,%timegenerated%,%HOSTNAME%,%syslogtag%,%msg%\n"; */
 	syslog (LOG_DEBUG, "Button Handler is Launching");
 
 	/* First Check ... Necessary Input Parameters Otherwise Handler Cannot Operate */
@@ -482,7 +490,8 @@ int main(int argc, char **argv)
 	sprintf(url, "%s:%s", opts.host, opts.port);
 
 	if (opts.verbose) {
-		//printf("Broker URL is %s\n", url);
+		/*printf("Broker URL is %s\n", url); */
+
 		syslog(LOG_DEBUG, "MQTT Broker URL : `%s`\n", url);
 	}
 
@@ -531,7 +540,8 @@ int main(int argc, char **argv)
 	{
 		/** Failure **/
 		
-		//perror("open");
+		/*perror("open");*/
+
 		syslog(LOG_ERR, "open() kEYBOARD Driver Failure\n");
 
 		/* Abort */
@@ -552,7 +562,8 @@ int main(int argc, char **argv)
 	{
 		/** Failure **/
 		
-		//perror("open");
+		/*perror("open");*/
+
 		syslog(LOG_ERR, "open() MOUSE Driver Failure\n");
 
 		/* Abort */
@@ -601,9 +612,10 @@ int main(int argc, char **argv)
 	/* Evtest Code Snippet .. */
 	while (1) {
 		/* Button Process Wait Until New Keystroke */
-		//printf("Blocked\n");
-        //rd = read( fd, ev, sizeof(struct input_event)*64 );
-		//printf("Unblocked\n");
+		
+		/* printf("Blocked\n"); */
+        /* rd = read( fd, ev, sizeof(struct input_event)*64 ); */
+		/* printf("Unblocked\n"); */
 
 		/** Blocking Read Wake Up **/
 	
@@ -683,7 +695,7 @@ int main(int argc, char **argv)
     }
 
 	while (!toStop) {
-		int data_len = 0;
+		/* int data_len = 0; */
 
 		/* 
 		 * I/O Multiplexing .. 
@@ -700,7 +712,7 @@ int main(int argc, char **argv)
 		   sigaddset(&ss, SIGWHATEVER);
 		   ready = pselect(nfds, &readfds, NULL, NULL, pto, &ss);
 		 */
-		//ready = select(nfds, &readfds, NULL, NULL, pto);
+		/*ready = select(nfds, &readfds, NULL, NULL, pto); */
 
 		if (ready == -1) {
 			/* An error occured */
@@ -720,7 +732,7 @@ int main(int argc, char **argv)
 		/* Ready for Select() Wakeup ... Device File is changed */
 		/* char buffer2[] = "Button Pressed\n"; - moved further up */
 
-		/* Read message-to-send from terminal */
+		/* Read message-to- send from terminal */
 		/* int delim_len = 0; *//* why???? */
 
 		/*

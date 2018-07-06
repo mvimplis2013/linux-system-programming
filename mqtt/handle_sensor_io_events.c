@@ -5,14 +5,15 @@
 
 #include "button_constants.h"
 
-//char mqtt_msg[1000];
+/*char mqtt_msg[1000];*/
 
-int 
+void 
 handleIOEventCommon(int fd, char *mqtt_msg) 
 {
     int rd;
 	struct input_event ev[64];
-    int i;
+    /*int i;*/
+    size_t i;
 
 	char msg_1[300];
 	char msg_2[300];
@@ -69,7 +70,8 @@ handleKeyboardIOEvent(int fd_key, char *mqtt_msg)
     return 1;
 }
 
-int handleMouseIOEvent(int fd_mouse, char *mqtt_msg) 
+int 
+handleMouseIOEvent(int fd_mouse, char *mqtt_msg) 
 {
     handleIOEventCommon(fd_mouse, mqtt_msg);
 
