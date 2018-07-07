@@ -1,0 +1,16 @@
+include local-config-button.mak
+
+DEFS+=  
+INCLUDES+= 
+LIBS+=
+
+
+CFLAGS+= -g 
+LDFLAGS+= 
+
+
+OBJS = $(PROJECT_NAME).o 
+
+include $(MAKE_DIR)/global.mak
+
+
