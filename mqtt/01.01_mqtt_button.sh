@@ -1,6 +1,6 @@
 #!/bin/bash
 source ../../../env.sh
-source local-config.mak
+source local-config-button.mak
 
 echo "+ make clean"
 make clean
