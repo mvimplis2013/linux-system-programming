@@ -13,7 +13,7 @@ if [[ $1 != "DONT_WAIT" ]]; then
 fi
 
 echo "+ make <Makefile>"
-make Makefile-button
+make Makefile_button
 
 if [[ $DEVKIT = "native" ]]; then
   echo "+ execute $PROJECT_NAME"
