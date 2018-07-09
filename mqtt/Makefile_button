@@ -13,8 +13,8 @@ DYLIB_MAKE_CMD=${CC} -v
 
 #all_miltos: ${DYLIBNAME} ${STLIBNAME}
 
-OBJS = ${PROJECT_NAME}.o 
-OBJS += my_command_line_parser.o 
+#OBJS = ${PROJECT_NAME}.o 
+OBJS = my_command_line_parser.o 
 
 #${OBJS}: %.o: %.c
 
