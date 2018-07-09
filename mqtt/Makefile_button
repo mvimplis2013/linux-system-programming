@@ -16,7 +16,7 @@ DYLIB_MAKE_CMD=${CC} -v
 OBJS = ${PROJECT_NAME}.o 
 OBJS += my_command_line_parser.o 
 
-${OBJS}: %.o: %.c
+#${OBJS}: %.o: %.c
 
 ${DYLIBNAME}: my_command_line_parser.o
 	      ${DYLIB_MAKE_CMD}
