@@ -25,11 +25,11 @@ argsparse_button(int argc, char **argv)
         {
             case 0:
                 /* If this option set a flag, do nothing else mow */
-                if (long_options[option_index].flag != 0) {
+                if (long_options_button[option_index].flag != 0) {
                     break;
                 }
 
-                printf("option %s", long_options[option_index].name);
+                printf("option %s", long_options_button[option_index].name);
 
                 if (optarg) {
                     printf(" with arg %s", optarg);
