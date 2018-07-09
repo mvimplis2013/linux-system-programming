@@ -4,7 +4,7 @@
 /* Flag set by '--verbose' */
 static int verbose_flag;
 
-static const char *optstring = "t:dev:";
+static const char *optstring_button = "t:d:";
 
 static const struct option long_options_button[] = {
     /* These options set a flag */
