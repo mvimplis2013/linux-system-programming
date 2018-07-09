@@ -5,7 +5,7 @@
 /* Flag set by '--verbose' */
 static int verbose_flag;
 
-int 
+int
 argsparse_parse(int argc, char **argv)
 {
     int c;
