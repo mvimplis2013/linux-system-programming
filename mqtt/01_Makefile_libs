@@ -1,6 +1,7 @@
 OBJS = my_command_line_parser.o 
 
+#LIBNAME=
 all: ${DYLIBNAME} ${STLIBNAME}
 
 ${OBJS}: %.o: %.c
-	 ${CC} -o $*.o -c $<
+	 ${CC} -o $*.o -c ${CFLAGS} $<
