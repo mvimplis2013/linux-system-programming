@@ -17,7 +17,7 @@ DYLIB_MAKE_CMD=${CC} -v
 all_miltos: ${DYLIBNAME} ${STLIBNAME}
 
 ${DYLIBNAME}: my_command_line_parser.o
-    echo "Hello"
+	      echo "Hello"
 #    ${DYLIB_MAKE_CMD}
 
 $(STLIBNAME): my_command_line_parser.o
