@@ -21,6 +21,7 @@ ${DYLIBNAME}: my_command_line_parser.o
 #    ${DYLIB_MAKE_CMD}
 
 $(STLIBNAME): my_command_line_parser.o
+	      echo "Miltos"
 #    ${STLIB_MAKE_CMD}
 
 #include $(MAKE_DIR)/global.mak
