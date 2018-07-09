@@ -13,7 +13,7 @@ static const struct option long_options_button[] = {
     
     /* These options do not set a flag. We distinguish them by their indices */
     {"topic", required_argument, 0, 't'},
-    {"device", required_argument, 0, 'dev'},
+    {"device", required_argument, 0, 'd'},
     {0, 0, 0, 0}
 };
 
