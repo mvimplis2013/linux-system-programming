@@ -17,6 +17,11 @@ static const struct option long_options_button[] = {
     {0, 0, 0, 0}
 };
 
+struct button_user_values {
+    char *topic;
+    char *device;
+} button_uv;
+
 int 
 argsparse_button(int argc, char **argv);
 
