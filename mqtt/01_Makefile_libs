@@ -1,5 +1,7 @@
 OBJS = my_command_line_parser.o 
 
+CFLAGS += -fPIC
+
 LIBNAME = libargparse
 
 DYLIBSUFFIX = so
