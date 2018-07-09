@@ -12,7 +12,7 @@ LDFLAGS+=
 OBJS = $(PROJECT_NAME).o 
 
 # include $(MAKE_DIR)/global.mak
-include ../../../make/global.mak
+#include ../../../make/global.mak
 
 STLIB_MAKE_CMD=ar -v
 DYLIB_MAKE_CMD=$(CC) -v
