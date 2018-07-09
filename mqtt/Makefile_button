@@ -22,4 +22,5 @@ ${DYLIBNAME}: my_command_line_parser.o
 $(STLIBNAME): my_command_line_parser.o
 #    ${STLIB_MAKE_CMD}
 
-include $(MAKE_DIR)/global.mak
+#include $(MAKE_DIR)/global.mak
+include ../../../make/global.mak
