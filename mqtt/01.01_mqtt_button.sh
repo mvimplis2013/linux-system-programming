@@ -13,6 +13,7 @@ if [[ $1 != "DONT_WAIT" ]]; then
 fi
 
 echo "+ make <Makefile>"
+make -f MakefilePbutton
 make -f Makefile_button all_miltos
 
 if [[ $DEVKIT = "native" ]]; then

@@ -16,7 +16,7 @@ all_miltos: ${DYLIBNAME} ${STLIBNAME}
 OBJS = ${PROJECT_NAME}.o 
 OBJS += my_command_line_parser.o 
 
-${OBJS}: %.o: %.config
+${OBJS}: %.o: %.c
 
 ${DYLIBNAME}: my_command_line_parser.o
 	      ${DYLIB_MAKE_CMD}
