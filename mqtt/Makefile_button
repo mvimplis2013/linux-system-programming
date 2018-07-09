@@ -17,7 +17,6 @@ OBJS = $(PROJECT_NAME).o
 STLIB_MAKE_CMD=ar -v
 DYLIB_MAKE_CMD=${CC} -v
 
-# Miltos   
 all_miltos: ${DYLIBNAME} ${STLIBNAME}
 
 $(DYLIBNAME): my_command_line_parser.o
