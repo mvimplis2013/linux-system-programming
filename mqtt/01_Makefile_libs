@@ -1,6 +1,6 @@
 OBJS = my_command_line_parser.o 
 
-CFLAGS += -fPIC
+LDFLAGS += -fPIC
 
 LIBNAME = libargparse
 
