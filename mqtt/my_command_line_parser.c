@@ -42,22 +42,14 @@ argsparse_button(int argc, char **argv, struct button_user_values *pbutton_uv)
             case 't':
                 pbutton_uv->topic = (char*) malloc( sizeof(char) * strlen(optarg) );
                 strcpy( pbutton_uv->topic, optarg );
-                
+
                 puts("option -a\n");
                 break;
 
             case 'd':
                 puts("option -b\n");
                 break;
-            case 'c':
-                printf("option -c with value `%s`\n", optarg);
-                break;
-            case 'd':
-                printf("option -d with valu `%s`\n", optarg);
-                break;
-            case 'f':
-                printf("option -f with value `%s`\n", optarg);
-                break;
+            
             case '?':
                 /* getopt_long already printed an error message */
                 break;
