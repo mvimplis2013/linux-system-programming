@@ -2,5 +2,3 @@ OBJS = my_command_line_parser.o
 
 ${OBJS}: %.o: %.c
 	 ${CC} -o $*.o -c $<
-
-include ../../../make/global.mak
