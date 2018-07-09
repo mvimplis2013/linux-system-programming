@@ -14,7 +14,7 @@ STLIBNAME = ${LIBNAME}.${STLIBSUFFIX}
 DYLIB_MAKE_CMD = gcc -shared -o ${DYLIBNAME} ${LDFLAGS}
 STLIB_MAKE_CMD = ar rcs ${STLIBNAME} 
 
-all: ${DYLIBNAME} ${STLIBNAME}
+all: clean ${DYLIBNAME} ${STLIBNAME}
 
 ${OBJS}: %.o: %.c
 	 ${CC} -o $*.o -c ${CFLAGS} $<
@@ -25,4 +25,5 @@ ${DYLIBNAME}: my_command_line_parser.o
 ${STLIBNAME}: my_command_line_parser.o
 	      ${STLIB_MAKE_CMD} $^
 
-	      
+clean:
+	rm -rf my_command_line_parser.[ao]
