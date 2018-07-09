@@ -43,7 +43,7 @@ argsparse_parse(int argc, char **argv)
                     break;
                 }
 
-                printf("option %s", long_options[options_index].name);
+                printf("option %s", long_options[option_index].name);
 
                 if (optarg) {
                     printf(" with arg %s", optarg);
