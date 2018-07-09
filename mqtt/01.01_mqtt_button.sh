@@ -6,7 +6,7 @@ echo "+++++"
 echo $(MAKE_DIR)
 
 echo "+ make clean"
-make clean
+make -f Makefile_button clean
 
 if [[ $1 != "DONT_WAIT" ]]; then
   vim $PROJECT_NAME.c
@@ -16,7 +16,7 @@ if [[ $1 != "DONT_WAIT" ]]; then
 fi
 
 echo "+ make <Makefile>"
-make Makefile_button
+make -f Makefile_button
 
 if [[ $DEVKIT = "native" ]]; then
   echo "+ execute $PROJECT_NAME"
