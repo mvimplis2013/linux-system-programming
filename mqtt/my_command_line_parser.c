@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 
 #include "my_command_line_parser.h"
 
 int
-argsparse_button(int argc, char **argv)
+argsparse_button(int argc, char **argv, struct button_user_values *pbutton_uv)
 {
     int c;
 
@@ -38,10 +39,14 @@ argsparse_button(int argc, char **argv)
                 printf("\n");
                 break;
 
-            case 'a':
+            case 't':
+                pbutton_uv->topic = (char*) malloc( sizeof(char) * strlen(optarg) );
+                strcpy( pbutton_uv->topic, optarg );
+                
                 puts("option -a\n");
                 break;
-            case 'b':
+
+            case 'd':
                 puts("option -b\n");
                 break;
             case 'c':

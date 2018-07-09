@@ -23,6 +23,6 @@ struct button_user_values {
 } button_uv;
 
 int 
-argsparse_button(int argc, char **argv);
+argsparse_button(int argc, char **argv, struct button_user_values *pbutton_uv);
 
 #endif
