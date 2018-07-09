@@ -8,14 +8,13 @@ LIBS+=
 CFLAGS+= -g 
 LDFLAGS+= 
 
-
-OBJS = ${PROJECT_NAME}.o 
-OBJS += my_command_line_parser.o 
-
 STLIB_MAKE_CMD=ar -v
 DYLIB_MAKE_CMD=${CC} -v
 
 all_miltos: ${DYLIBNAME} ${STLIBNAME}
+
+OBJS = ${PROJECT_NAME}.o 
+OBJS += my_command_line_parser.o 
 
 ${DYLIBNAME}: my_command_line_parser.o
 	      ${DYLIB_MAKE_CMD}
