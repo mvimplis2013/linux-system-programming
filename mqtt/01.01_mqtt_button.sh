@@ -14,7 +14,7 @@ fi
 
 echo "+ make <Makefile>"
 make -f Makefile_button
-make -f Makefile_button all_miltos
+#make -f Makefile_button all_miltos
 
 if [[ $DEVKIT = "native" ]]; then
   echo "+ execute $PROJECT_NAME"
