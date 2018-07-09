@@ -1,6 +1,6 @@
 OBJS = my_command_line_parser.o 
 
-CFLAGS  +=
+CFLAGS  += -fPIC
 LDFLAGS +=
 
 LIBNAME = libargparse
@@ -20,7 +20,7 @@ ${OBJS}: %.o: %.c
 	 ${CC} -o $*.o -c ${CFLAGS} $<
 
 ${DYLIBNAME}: my_command_line_parser.o
-	      ${DYLIB_MAKE_CMD} $^
+#	      ${DYLIB_MAKE_CMD} $^
 
 ${STLIBNAME}: my_command_line_parser.o
 	      ${STLIB_MAKE_CMD} $^
