@@ -14,7 +14,8 @@ OBJS = $(PROJECT_NAME).o
 # include $(MAKE_DIR)/global.mak
 include ../../../make/global.mak
 
-DYLIBNAME
+DYLIB_MAKE_CMD=$(CC) -v
+
 # Miltos   
 all_miltos: $(DYLIBNAME) $(STLIBNAME)
 
