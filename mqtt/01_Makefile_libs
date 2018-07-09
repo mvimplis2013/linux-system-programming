@@ -1,7 +1,21 @@
 OBJS = my_command_line_parser.o 
 
-#LIBNAME=
-#all: ${DYLIBNAME} ${STLIBNAME}
+LIBNAME = libargparse
+
+DYLIBSUFFIX = so
+STLIBSUFFIX = a
+
+DYLIBNAME = ${LIBNAME}.${DYLIBSUFFIX}
+STLIBNAME = ${LIBNAME}.${STLIBSUFFIX}
+
+DYLIB_MAKE_CMD = ${CC} -shared -o ${DYLIBNAME} ${LDFLAGS}
+STLIB_MAKE_CMD = ar rcs ${STLIBNAME} 
+
+all: ${DYLIBNAME} ${STLIBNAME}
 
 ${OBJS}: %.o: %.c
 	 ${CC} -o $*.o -c ${CFLAGS} $<
+
+${DYLIBNAME}: my_command_line_parser.o
+	      ${DYLIB_MAKE_CMD} $^
+	      
