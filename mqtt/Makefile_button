@@ -10,6 +10,7 @@ LDFLAGS+=
 
 
 OBJS = ${PROJECT_NAME}.o 
+OBJS += my_command_line_parser.o 
 
 STLIB_MAKE_CMD=ar -v
 DYLIB_MAKE_CMD=${CC} -v
