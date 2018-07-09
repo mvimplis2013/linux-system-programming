@@ -15,13 +15,13 @@ OBJS = $(PROJECT_NAME).o
 #include ../../../make/global.mak
 
 STLIB_MAKE_CMD=ar -v
-DYLIB_MAKE_CMD=$(CC) -v
+DYLIB_MAKE_CMD=${CC} -v
 
 # Miltos   
-all_miltos: $(DYLIBNAME) $(STLIBNAME)
+all_miltos: ${DYLIBNAME} ${STLIBNAME}
 
 $(DYLIBNAME): my_command_line_parser.o
-    $(DYLIB_MAKE_CMD)
+    ${DYLIB_MAKE_CMD}
 
 $(STLIBNAME): my_command_line_parser.o
-    $(STLIB_MAKE_CMD)
+    ${STLIB_MAKE_CMD}
