@@ -1,7 +1,10 @@
 #ifndef MY_COMMAND_LINE_PARSER_H
 #define MY_COMMAND_LINE_PARSER_H
 
- static struct option long_options[] = {
+/* Flag set by '--verbose' */
+static int verbose_flag;
+ 
+static struct option long_options[] = {
             /* These options set a flag */
             {"verbose", no_argument, &verbose_flag, 1},
             {"brief",   no_argument, &verbose_flag, 0},

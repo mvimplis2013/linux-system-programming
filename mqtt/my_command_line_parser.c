@@ -4,9 +4,6 @@
 
 #include "my_command_line_parser.h"
 
-/* Flag set by '--verbose' */
-static int verbose_flag;
-
 int
 argsparse_button(int argc, char **argv)
 {
