@@ -47,6 +47,9 @@ argsparse_button(int argc, char **argv, struct button_user_values *pbutton_uv)
                 break;
 
             case 'd':
+                pbutton_uv->device = (char*) malloc( sizeof(char) * strlen(optarg) );
+                strcpy( pbutton_uv->device, optarg );
+
                 puts("option -b\n");
                 break;
             
