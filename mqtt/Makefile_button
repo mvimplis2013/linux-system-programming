@@ -9,21 +9,18 @@ CFLAGS+= -g
 LDFLAGS+= 
 
 
-OBJS = $(PROJECT_NAME).o 
+OBJS = ${PROJECT_NAME}.o 
 
 STLIB_MAKE_CMD=ar -v
 DYLIB_MAKE_CMD=${CC} -v
 
-all_miltos: $(DYLIBNAME) ${STLIBNAME}
+all_miltos: ${DYLIBNAME} ${STLIBNAME}
 
-$(DYLIBNAME): 
-#my_command_line_parser.o
-	      echo "Hello"
-#    ${DYLIB_MAKE_CMD}
+${DYLIBNAME}: my_command_line_parser.o
+	      ${DYLIB_MAKE_CMD}
 
-$(STLIBNAME): my_command_line_parser.o
-	      echo "Miltos"
-#    ${STLIB_MAKE_CMD}
+${STLIBNAME}: my_command_line_parser.o
+	      ${STLIB_MAKE_CMD}
 
 #include $(MAKE_DIR)/global.mak
 include ../../../make/global.mak
