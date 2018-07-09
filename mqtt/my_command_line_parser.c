@@ -2,29 +2,18 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "my_command_line_parser.h"
+
 /* Flag set by '--verbose' */
 static int verbose_flag;
 
 int
-argsparse_parse(int argc, char **argv)
+argsparse_button(int argc, char **argv)
 {
     int c;
 
     while (1) 
     {
-        static struct option long_options[] = {
-            /* These options set a flag */
-            {"verbose", no_argument, &verbose_flag, 1},
-            {"brief",   no_argument, &verbose_flag, 0},
-            /* These options do not set a flag. We distinguish them by their indices */
-            {"add", no_argument, 0, 'a'},
-            {"append", no_argument, 0, 'b'},
-            {"delete", required_argument, 0, 'd'},
-            {"create", required_argument, 0, 'c'},
-            {"file",   required_argument, 0, 'f'},
-            {0, 0, 0, 0}
-        };
-
         /* getopt_long stores the option idex here */
         int option_index = 0;
 
