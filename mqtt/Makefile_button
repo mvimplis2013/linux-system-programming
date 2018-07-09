@@ -11,8 +11,6 @@ LDFLAGS+=
 
 OBJS = $(PROJECT_NAME).o 
 
-echo "+++++"
-echo $(MAKE_DIR)
 include $(MAKE_DIR)/global.mak
 
 # Miltos   

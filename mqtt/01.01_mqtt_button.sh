@@ -2,6 +2,9 @@
 source ../../../env.sh
 source local-config-button.mak
 
+echo "+++++"
+echo $(MAKE_DIR)
+
 echo "+ make clean"
 make clean
 
