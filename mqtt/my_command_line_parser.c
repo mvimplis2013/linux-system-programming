@@ -6,7 +6,7 @@
 static int verbose_flag;
 
 int 
-main(int argc, char **argv)
+argsparse_parse(int argc, char **argv)
 {
     int c;
 
