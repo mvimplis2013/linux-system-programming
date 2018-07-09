@@ -15,4 +15,4 @@ OBJS = $(PROJECT_NAME).o
 include ../../../make/global.mak
 
 # Miltos   
-$(CC) --version
+all_miltos: ${DYLIBNAME} ${STLIBNAME}
