@@ -11,7 +11,8 @@ LDFLAGS+=
 
 OBJS = $(PROJECT_NAME).o 
 
-include $(MAKE_DIR)/global.mak
+# include $(MAKE_DIR)/global.mak
+include ../../../make/global.mak
 
 # Miltos   
 $(CC) --version
