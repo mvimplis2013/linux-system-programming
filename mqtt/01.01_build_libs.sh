@@ -1,4 +1,4 @@
 #!/bin/bash
 source ../../../env.sh
 
-make -f Makefile_libs
+make -f 01_Makefile_libs
