@@ -7,5 +7,7 @@ LIBS += -L/usr/local/lib/ -lpaho-mqtt3a
 CFLAGS+= -g 
 LDFLAGS+= 
 
+OTHER_OBJS = handle_sensor_io_events.o
+
 #include $(MAKE_DIR)/global.mak
 include ../../../make/global.mak
