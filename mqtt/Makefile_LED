@@ -1,7 +1,7 @@
 include local-config-button.mak
 
 DEFS+=  
-INCLUDES+= 
+INCLUDES += -I/usr/local/include 
 LIBS+=
 
 CFLAGS+= -g 
