@@ -3,7 +3,9 @@
 #include <string.h>
 #include <linux/input.h>
 
+/* Robert very agree and using violence */ 
 #pragma GCC diagnostic ignored "-Woverride-init"
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "button_constants.h"
 
