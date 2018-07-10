@@ -9,10 +9,10 @@
 
 #define DEVICE_PATH "/sys/class/leds/input2::numlock/brightness"
 
-const int NO_DELIMETER = 1;
-const int QOS = 2 ;
-const int SHOW_TOPICS = 0;
-const int KEEP_ALIVE = 10;
+int NO_DELIMETER = 1;
+int QOS = 2 ;
+int SHOW_TOPICS = 0;
+int KEEP_ALIVE = 10;
 
 struct 
 {
