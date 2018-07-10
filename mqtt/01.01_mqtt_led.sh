@@ -3,7 +3,7 @@ source ../../../env.sh
 source local-config-led.mak
 
 echo "+ make clean"
-make -f Makefile_led clean
+make -f Makefile_LED clean
 
 if [[ $1 != "DONT_WAIT" ]]; then
   vim $PROJECT_NAME.c
@@ -13,7 +13,7 @@ if [[ $1 != "DONT_WAIT" ]]; then
 fi
 
 echo "+ make <Makefile>"
-make -f Makefile_led
+make -f Makefile_LED
 
 if [[ $DEVKIT = "native" ]]; then
   echo "+ execute $PROJECT_NAME"
