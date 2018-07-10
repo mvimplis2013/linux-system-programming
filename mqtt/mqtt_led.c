@@ -8,13 +8,14 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <fcntl.h> 
 
 #include <syslog.h>
 
 #include <sys/select.h>
 
 #include <time.h>
+#define _POSIX_C_SOURCE 199309L
 
 /* Hope Robert will not kill me */
 #define _BSD_SOURCE
