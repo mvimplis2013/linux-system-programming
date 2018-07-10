@@ -24,22 +24,6 @@
 /* Pipe File Descriptots : 0/Read-end & 1/Write-end */
 int pfd[2];
 
-struct 
-{
-    char *clientid;
-    int nodelimiter;
-    char delimeter;
-    int qos;
-    char *username;
-    char *password;
-    char *host;
-    char *port;
-    int showtopics;
-    int keepalive;
-} opts = {
-    "led-subscriber-async-01A", 1, '\n', 2, NULL, NULL, "localhost", "1883", 0, 10
-};
-
 volatile int finished = 0;
 char *topic = NULL;
 int subscribed = 0;
