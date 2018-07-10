@@ -2,7 +2,7 @@ include local-config-button.mak
 
 DEFS+=  
 INCLUDES += -I/usr/local/include 
-LIBS+=
+LIBS += -L/usr/local/lib/ -lpaho-mqtt3a
 
 CFLAGS+= -g 
 LDFLAGS+= 
