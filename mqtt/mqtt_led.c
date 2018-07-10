@@ -21,12 +21,6 @@
 
 #include "mqtt_led.h"
 
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-
-#define DEVICE_PATH "/sys/class/leds/input2::numlock/brightness"
-
-#define LOG_LEVEL LOG_DEBUG
-
 /* Pipe File Descriptots : 0/Read-end & 1/Write-end */
 int pfd[2];
 
