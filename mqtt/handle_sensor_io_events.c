@@ -3,6 +3,8 @@
 #include <string.h>
 #include <linux/input.h>
 
+#pragma GCC diagnostic ignored "-Woverride"
+
 #include "button_constants.h"
 
 /*char mqtt_msg[1000];*/
