@@ -2,7 +2,7 @@
  * gcc -I/usr/local/include -L/usr/local/lib/ -o select_mqtt_async_sub_led select_mqtt_async_sub_led.c -lpaho-mqtt3a
  */
 
-/* Needed for Nanosleep - Robert might be angry */
+/* Needed for Nanosleep - Hope Robert will NOT kill me */
 #define _POSIX_C_SOURCE 199309L
 
 #include "MQTTAsync.h"
@@ -18,9 +18,6 @@
 #include <sys/select.h>
 
 #include <time.h>
-
-/* Hope Robert will not kill me */
-/*#define _BSD_SOURCE*/
 
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
