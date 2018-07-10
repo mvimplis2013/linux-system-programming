@@ -28,10 +28,10 @@ struct
     int keepalive;
 } opts = {
     "led-subscriber-async-01A", 
-    NO_DELIMETER, '\n', QOS, 
+    1, '\n', 2, 
     NULL, NULL, 
     "localhost", "1883", 
-    SHOW_TOPICS, KEEP_ALIVE
+    0, 10
 };
 
 #endif
