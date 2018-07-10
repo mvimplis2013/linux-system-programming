@@ -19,6 +19,8 @@
 
 #include <time.h>
 
+#include "mqtt_led.h"
+
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 #define DEVICE_PATH "/sys/class/leds/input2::numlock/brightness"
@@ -41,7 +43,7 @@ struct
     int showtopics;
     int keepalive;
 } opts = {
-    "stdout-subscriber-async", 1, '\n', 2, NULL, NULL, "localhost", "1883", 0, 10
+    "led-subscriber-async-01A", 1, '\n', 2, NULL, NULL, "localhost", "1883", 0, 10
 };
 
 volatile int finished = 0;
