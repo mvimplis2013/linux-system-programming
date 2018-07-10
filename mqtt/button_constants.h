@@ -1,6 +1,8 @@
 #ifndef BUTTON_CONSTANTS
 #define BUTTON_CONSTANTS
 
+#pragma GCC diagnostic ignored "-Woverride-init"
+
 char *events[EV_MAX + 1] = {
 	[0 ... EV_MAX] = NULL,
 	[EV_SYN]        = "Sync",			[EV_KEY] = "Key",
