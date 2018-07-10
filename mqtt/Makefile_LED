@@ -1,4 +1,4 @@
-include local-config-button.mak
+include local-config-led.mak
 
 DEFS+=  
 INCLUDES += -I/usr/local/include 
