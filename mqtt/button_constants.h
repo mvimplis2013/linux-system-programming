@@ -1,7 +1,7 @@
 #ifndef BUTTON_CONSTANTS
 #define BUTTON_CONSTANTS
 
-#pragma GCC diagnostic ignored "-Werror=override-init"
+#pragma GCC diagnostic ignored "-Woverride"
 
 char *events[EV_MAX + 1] = {
 	[0 ... EV_MAX] = NULL,
