@@ -2,6 +2,8 @@
  * gcc -I/usr/local/include -L/usr/local/lib/ -o select_mqtt_async_sub_led select_mqtt_async_sub_led.c -lpaho-mqtt3a
  */
 
+#define _POSIX_C_SOURCE 199309L
+
 #include "MQTTAsync.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +16,6 @@
 
 #include <sys/select.h>
 
-#define _POSIX_C_SOURCE 199309L
 #include <time.h>
 
 /* Hope Robert will not kill me */
