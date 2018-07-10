@@ -14,7 +14,7 @@ const int QOS = 2 ;
 const int SHOW_TOPICS = 0;
 const int KEEP_ALIVE = 10;
 
-const struct 
+struct 
 {
     char *clientid;
     int nodelimiter;
