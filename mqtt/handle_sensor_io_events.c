@@ -3,7 +3,7 @@
 #include <string.h>
 #include <linux/input.h>
 
-#pragma GCC diagnostic ignored "-Woverride"
+#pragma GCC diagnostic ignored "-Woverride-init"
 
 #include "button_constants.h"
 
