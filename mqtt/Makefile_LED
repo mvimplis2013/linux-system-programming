@@ -1,0 +1,11 @@
+include local-config-button.mak
+
+DEFS+=  
+INCLUDES+= 
+LIBS+=
+
+CFLAGS+= -g 
+LDFLAGS+= 
+
+#include $(MAKE_DIR)/global.mak
+include ../../../make/global.mak
