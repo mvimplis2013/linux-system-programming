@@ -16,3 +16,19 @@ var optimist = require('optimist')
     .describe('help', 'Display this help message.');
 
 var arg = opimist.argv;
+
+if (argv.help) {
+    optimist.showHelp();
+    process.exit(0);
+}
+
+if (argv.debug) {
+    process.env['NODE_DEBUG_AMQP'] = true;
+}
+
+global.util = require('util');
+global.puts = console.log;
+global.assert = require('assert');
+global.amqp = require('node-amqp');
+global.options = _.assignIn(global.options || {}, argv);
+ 
