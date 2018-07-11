@@ -59,7 +59,7 @@ struct led_user_values {
     char *device;
 } led_uv;
 
-int 
+static int 
 argsparse_led(int argc, char **argv, struct led_user_values *pled_uv);
 
 #endif

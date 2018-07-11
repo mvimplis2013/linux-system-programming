@@ -20,6 +20,10 @@
 #include <time.h>
 
 #include "mqtt_led.h"
+#include "my_command_line_parser.h"
+
+/* Connect to Broker Aynchronously */
+MQTTAsync client;
 
 /* Pipe File Descriptots : 0/Read-end & 1/Write-end */
 int pfd[2];
@@ -152,21 +156,34 @@ void handleLedOnRequest() {
  ** ******************************************** **/
 int main(int argc, char *argv[]) 
 {
-    MQTTAsync client;
+    /* MQTT Broker URL - Most often ... localhost:1883 */
     char url[100];
+
+    /* Response Code for Async_Create/ Open/ ... */
     int rc = 0;
 
+    /* For SELECT statement set of input devices ... concurrent monitoring 
+       Set up a Custom Application Event Loop ... 
+       1) Controller Broadcasts a New Led-On Message
+       2) Asynchronous Client to MQTT-Broker Wakes Up and Executes OnMessageArrived
+       3) Asynchronous Client Writes a New Message to Pipe 
+       4) Local Event Loop with SELECT() because .... readfds[ pipe[0] ]
+       5) Light Up the Led ... by changing the boolean value of the appropriate variable in /device/ file
+    */  
+    
+    /* SELECT() Configuration Parameters */
     fd_set readfds;
-
     int nfds;
     struct timeval *pto;
     int ready;
 
-    /* Sleep for half a second */
+    /* Sleep for half a second ... every 0.5 sec check the Led Process "Is it Finished/ Ended" ? */
     const struct timespec requested_time[] = {{0, 50000000L}};
     struct timespec *remaining = NULL;
 
-    MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
+    /* MQTTAsync-Client Various Callback onXXXX() Setup */
+    /* OnDisconnect() */
+    MQTTAsync_disconnectOptions disc_opts;
 
     /* ************************* SYSLOG Setup **************************  */
 	/* *****************************************************************  */
@@ -178,24 +195,33 @@ int main(int argc, char *argv[])
 	 * 
 	 * openlog may or may not open the /dev/log socket, depending on option. If it does, it tries to open it and connect it as a stream socket.
 	 */  
-	openlog ( "controller-handler", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-	/*const char *format = "%syslogpriority%,%syslogfacility%,%timegenerated%,%HOSTNAME%,%syslogtag%,%msg%\n"; */
-	syslog (LOG_DEBUG, "Button Handler is Launching");
+	openlog( "led-async-handler", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	
+    /* LED Controller is Launching Up */
+    syslog( LOG_DEBUG, "LED Asynch Handler is Launching Up !" );
 
-    if ( argc<2 ) {
+    /*** Application External Configuration ***/
+    /* Check that the Minimum Number of Input Parameters is Available */ 
+    if ( argc < 2 ) {
         usage();
     }
 
+    /* Listening to MQTT-Messages Related to Topic */ 
     topic = argv[1];
 
-    if (strchr(topic, '#') || strchr(topic, '+')) {
-        opts.showtopics = 1;
+    if ( strchr(topic, '#') || strchr(topic, '+') ) {
+        // All Topics
     } 
+
     if (opts.showtopics) {
+        ;
     }
 
+    paramsparse_led();
+    
     getopts(argc, argv);
     sprintf(url, "%s:%s", opts.host, opts.port);
+    /*** Finished with Application External Configuration ***/
 
     /* Pipe .. connect MQTT-Lights-on messages to LED event loop */
     if (pipe(pfd) == -1) {
@@ -283,6 +309,7 @@ int main(int argc, char *argv[])
             /* usleep(10000L); */
         }
 
+        disc_opts = MQTTAsync_disconnectOptions_initializer;
         disc_opts.onSuccess = onDisconnect;
         if ((rc = MQTTAsync_disconnect(client, &disc_opts)) != MQTTASYNC_SUCCESS) {
             syslog(LOG_DEBUG, "Failed to start disconnect, return code %d\n", rc);

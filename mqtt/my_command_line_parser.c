@@ -84,7 +84,7 @@ argsparse_button(int argc, char **argv, struct button_user_values *pbutton_uv)
 /**
  * LED options
  **/
-int 
+static int 
 argsparse_led(int argc, char **argv, struct led_user_values *pled_uv) {
     int c;
 
@@ -126,7 +126,11 @@ argsparse_led(int argc, char **argv, struct led_user_values *pled_uv) {
                 strcpy( pled_uv->host, optarg);
                 break;
 
-                pled_uv->topic = (char*) malloc( sizeof(char) * strlen(optarg) );
+            case 'p':
+                pled_uv->host = (char *)malloc( sizeof(char) * strlen(optarg) );
+                strcpy( pled_uv->host, optarg);
+                break;
+    pled_uv->topic = (char*) malloc( sizeof(char) * strlen(optarg) );
                 strcpy( pbutton_uv->topic, optarg );
 
                 puts("option -a\n");
