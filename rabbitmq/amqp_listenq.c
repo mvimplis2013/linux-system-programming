@@ -1,11 +1,16 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 #include <amqp.h>
 #include <amqp_tcp_socket.h>
 
+#include <assert.h>
+
 #include "utils.h"
 
-int main(int argc, char const *const *argv) {
+int main(int argc, const char *argv[]) {
     char const *hostname;
     int port, status;
     char const *queuename;
@@ -14,7 +19,8 @@ int main(int argc, char const *const *argv) {
     amqp_connection_state_t conn;
 
     if (argc < 4) {
-        fprintf(stderr, "Usage: amqp_listenq hostname port queuename\n");
+        fprintf(stderr, "Usage: amqp_listenq host port queuename\n");
+
         return 1;
     }
 
@@ -35,16 +41,27 @@ int main(int argc, char const *const *argv) {
     }
 
     die_on_amqp_error(
-        amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, 
-            "guest", "guest"), "Logging in"
+        amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"), 
+        "Logging in"
     );
     
+    /*  Some applications need multiple connections to an AMQP broker.
+        It is undesirable to keep many TCP connections open at the same time.
+        AMQP connections are multiplexed with channels.
+    */
     amqp_channel_open(conn, 1);
 
     die_on_amqp_error( 
         amqp_get_rpc_reply(conn), "Opening channel");
     
-    amqp_basic_consume(conn, 1, 
+    /*  Queues in the AMQP-0.9.1 model are very similar to queues in other 
+        message- and task- queueing systems: they store messages that are 
+        consumed by applications.
+        Queues properties : 
+            Name, Durable (will survive a broker restart), exclusive (used by
+            only one connection), Auto-delete, Arguments
+        */
+    amqp_basic_consume( conn, 1, 
         amqp_cstring_bytes(queuename), 
         amqp_empty_bytes, 0, 0, 0, amqp_empty_table);
 
